@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ASCII Wallpapers</string>
+    <string name="wallpaper_name">ASCII Wallpapers</string>
+    <string name="wallpaper_description">Живые 3D-фигуры из символов. Неоновый зелёный, чёрный терминал.</string>
+
+    <string name="header_title">ASCII WALLPAPERS</string>
+    <string name="header_subtitle">// live terminal engine v1.0</string>
+    <string name="preview_label">ПРЕВЬЮ В РЕАЛЬНОМ ВРЕМЕНИ</string>
+
+    <string name="section_shape">ФИГУРА</string>
+    <string name="section_density">ПЛОТНОСТЬ СИМВОЛОВ</string>
+    <string name="section_speed">СКОРОСТЬ ВРАЩЕНИЯ</string>
+    <string name="section_fps">ЧАСТОТА КАДРОВ</string>
+    <string name="section_thickness">ТОЛЩИНА ЛИНИЙ</string>
+    <string name="section_color">ЦВЕТ СИМВОЛОВ</string>
+    <string name="section_unlock">СВОЯ АНИМАЦИЯ НА РАЗБЛОКИРОВКУ</string>
+    <string name="section_unlock_hint">Вспышка символов при разблокировке устройства</string>
+
+    <string name="shape_pasta">Макароны</string>
+    <string name="shape_cubes">Кубы</string>
+    <string name="shape_big_cube">Большой куб</string>
+    <string name="shape_dna">ДНК</string>
+    <string name="shape_black_hole">Чёрная дыра</string>
+
+    <string name="value_density">%1$d символов</string>
+    <string name="value_speed">%1$d</string>
+    <string name="value_thickness">%1$sx</string>
+    <string name="value_fps">%1$d FPS</string>
+
+    <string name="color_white">Белый</string>
+    <string name="color_green">Зелёный</string>
+    <string name="color_amber">Янтарный</string>
+
+    <string name="install_wallpaper">УСТАНОВИТЬ ОБОИ</string>
+    <string name="install_hint">Откроется системный выбор живых обоев</string>
+    <string name="wallpaper_picker_unavailable">Не удалось открыть системный выбор обоев</string>
+</resources>

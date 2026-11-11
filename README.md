@@ -1,0 +1,78 @@
+# ASCII Wallpapers
+
+Живые обои, которые рисуют 3D-фигуры символами в стиле зелёного терминала.
+
+<p align="center">
+  <b>ASCII Wallpapers</b> · <code>com.ascii.wallpaper</code>
+</p>
+
+## Возможности
+
+- **5 фигур**: макароны (три запутанных тора), кубы (кластер каркасных кубов),
+  большой куб, ДНК (двойная спираль с перемычками), чёрная дыра (аккреционный
+  диск + фотонное кольцо).
+- **Живое превью** в шапке настроек — тот же рендерер, что и у обоев, поэтому
+  превью 1:1 совпадает с рабочим столом.
+- **Настройки применяются мгновенно**: каждое изменение сразу пишется в
+  `SharedPreferences`, сервис обоев слушает изменения и перерисовывается без
+  перезапуска.
+- **Настройки**: плотность символов 40–200, скорость вращения 0–30, частота
+  кадров 30/45/60/90/120, толщина линий 0.5x–2.0x, цвет символов
+  (белый/зелёный/янтарный), своя анимация на разблокировку.
+- **Экономия батареи**: цикл отрисовки полностью останавливается в
+  `onVisibilityChanged(false)`, кадры пейсятся через `Choreographer` с учётом
+  выбранного FPS.
+
+## Архитектура
+
+```
+app/src/main/java/com/ascii/wallpaper/
+├── MainActivity.kt               # экран настроек + запуск системного выбора обоев
+├── data/
+│   ├── AsciiSettings.kt          # модель настроек, фигуры, цвета
+│   └── SettingsRepository.kt     # SharedPreferences: единый источник правды
+├── engine/
+│   ├── AsciiRenderer.kt          # вращение → перспектива → выбор символа
+│   ├── Shapes.kt                 # генерация 3D-точек для пяти фигур
+│   └── AsciiWallpaperService.kt  # WallpaperService + Choreographer + Canvas
+└── ui/
+    ├── SettingsScreen.kt
+    ├── SettingsViewModel.kt
+    ├── components/               # карточки, слайдеры, селекторы, превью
+    └── theme/                    # Green Terminal палитра и типографика
+```
+
+Рендерер работает без аллокаций в кадре: облако точек строится один раз при
+смене фигуры/плотности/толщины, а сортировка по глубине выполняется через
+`LongArray` + `Arrays.sort`, без боксинга.
+
+## Палитра
+
+| Элемент | Цвет |
+| --- | --- |
+| Фон | `#0A0F0A` |
+| Акцент | `#00FF41` |
+| Карточки | `#111A11`, радиус 12 dp |
+| Текст | `#FFFFFF` |
+
+## Сборка
+
+```bash
+./gradlew assembleDebug     # app/build/outputs/apk/debug/app-debug.apk
+./gradlew assembleRelease   # R8-минифицированный APK
+```
+
+Требуется JDK 17 и Android SDK 35 (`compileSdk = 35`, `minSdk = 26`).
+
+## GitHub Actions
+
+Workflow `.github/workflows/android.yml` собирает debug и release APK на каждый
+push в `main`, pull request и вручную (`workflow_dispatch`), загружает их
+артефактами, а на тег `v*` прикрепляет к GitHub Release.
+
+## Установка обоев
+
+Кнопка **«УСТАНОВИТЬ ОБОИ»** открывает
+`Intent.ACTION_CHANGE_LIVE_WALLPAPER` с компонентом
+`AsciiWallpaperService`; если OEM-прошивка не поддерживает этот интент,
+используется `ACTION_LIVE_WALLPAPER_CHOOSER`.
