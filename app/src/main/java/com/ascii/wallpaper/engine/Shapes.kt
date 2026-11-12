@@ -4,6 +4,7 @@ import com.ascii.wallpaper.data.ShapeType
 import java.util.Random
 import kotlin.math.PI
 import kotlin.math.cos
+import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.sqrt
 
@@ -14,15 +15,22 @@ internal class PointCloud(capacity: Int) {
     val z = FloatArray(capacity)
     val shade = FloatArray(capacity)
 
+    /**
+     * Relative angular velocity around the shape's Y axis. 0 means the point is
+     * rigidly attached to the body, >0 means it orbits (accretion disk).
+     */
+    val spin = FloatArray(capacity)
+
     var size: Int = 0
         private set
 
-    fun add(px: Float, py: Float, pz: Float, brightness: Float) {
+    fun add(px: Float, py: Float, pz: Float, brightness: Float, spinRatio: Float = 0f) {
         if (size >= x.size) return
         x[size] = px
         y[size] = py
         z[size] = pz
         shade[size] = brightness
+        spin[size] = spinRatio
         size++
     }
 }
@@ -267,19 +275,33 @@ internal object ShapeFactory {
 
     // ----------------------------------------------------------- black hole --
 
-    /** Accretion disk + photon ring with an empty event horizon. */
+    /**
+     * Accretion disk + photon ring with an empty event horizon.
+     *
+     * Every disk point carries a Keplerian spin ratio: omega ~ r^-1.5, so the
+     * inner rings visibly outrun the outer ones. The brightness is modulated by
+     * spiral arms, which makes the differential rotation readable at a glance.
+     */
     private fun blackHole(pc: PointCloud, count: Int, thickness: Float, random: Random) {
         val diskPoints = (count * 0.84f).toInt()
         if (diskPoints <= 0) return
+        val innerRadius = 0.62f
+
         for (i in 0 until diskPoints) {
             val u = random.nextFloat()
-            val r = 0.62f + sqrt(u) * 1.02f
-            val angle = random.nextFloat() * TAU + r * 2.1f
-            val x = (cos(angle) * r).toFloat()
-            val z = (sin(angle) * r).toFloat()
+            val r = innerRadius + sqrt(u) * 1.02f
+            val angle = random.nextFloat() * TAU
+            val spiral = angle + r * 2.1f
+            val x = (cos(spiral.toDouble()) * r).toFloat()
+            val z = (sin(spiral.toDouble()) * r).toFloat()
             val y = (random.nextGaussian() * 0.012f * (2.2f - thickness)).toFloat()
-            val shade = (1.18f - r * 0.42f).coerceIn(0.18f, 1f)
-            pc.add(x, y, z, shade)
+
+            val arm = 0.5f + 0.5f * sin(3f * angle - 5f * r)
+            val radial = (1.18f - r * 0.42f).coerceIn(0.18f, 1f)
+            val shade = (radial * (0.45f + 0.55f * arm)).coerceIn(0.1f, 1f)
+
+            val spinRatio = (innerRadius / r).pow(1.5f)
+            pc.add(x, y, z, shade, spinRatio)
         }
 
         val ringPoints = count - diskPoints

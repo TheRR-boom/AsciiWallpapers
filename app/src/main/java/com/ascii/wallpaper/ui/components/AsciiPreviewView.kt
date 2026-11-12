@@ -22,8 +22,8 @@ class AsciiPreviewView @JvmOverloads constructor(
     private val choreographer = Choreographer.getInstance()
 
     private var settings: AsciiSettings = AsciiSettings.DEFAULT
-    private var startNanos = 0L
     private var lastDrawNanos = 0L
+    private var lastRenderNanos = 0L
     private var running = false
     private var scheduled = false
 
@@ -61,8 +61,8 @@ class AsciiPreviewView @JvmOverloads constructor(
     private fun startLoop() {
         if (running) return
         running = true
-        startNanos = System.nanoTime()
-        lastDrawNanos = startNanos
+        lastDrawNanos = System.nanoTime()
+        lastRenderNanos = 0L
         schedule()
     }
 
@@ -91,8 +91,14 @@ class AsciiPreviewView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val elapsed = (System.nanoTime() - startNanos) / 1_000_000_000f
-        renderer.draw(canvas, width, height, elapsed, 0f)
+        val now = System.nanoTime()
+        val dt = if (lastRenderNanos == 0L) {
+            0f
+        } else {
+            (now - lastRenderNanos) / 1_000_000_000f
+        }
+        lastRenderNanos = now
+        renderer.draw(canvas, width, height, dt, 0f)
     }
 
     private companion object {
